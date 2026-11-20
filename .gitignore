@@ -1,0 +1,19 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Maven build files
+**/target/
+
+# Environment variables and secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Java compiled files
+*.class
+
+# Logs
+*.log
