@@ -2,12 +2,14 @@ package com.example.auth_service.controller;
 
 import com.example.auth_service.dto.LoginRequest;
 import com.example.auth_service.dto.RegisterRequest;
+import com.example.auth_service.dto.RoleUpdateRequest;
 import com.example.auth_service.service.AuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,7 +36,19 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+    @PutMapping("/admin/users/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> updateUserRole(
+            @PathVariable Long id,
+            @Valid @RequestBody RoleUpdateRequest request) {
 
+        String response = authService.updateUserRole(
+                id,
+                request.getRole()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
 
 }

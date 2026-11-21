@@ -23,11 +23,40 @@ public class WeatherController {
     private final WeatherService weatherService;
     private final UsageService usageService;
     private final RateLimitService rateLimitService;
+    @PreAuthorize("hasAnyRole('USER', 'PREMIUM')")
     @GetMapping("/current")
     public weatherResponse getCurrentWeather(
-            @RequestParam String city,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lon,
             Authentication authentication) {
-        validateCity(city);
+
+        if (city != null && !city.isBlank()) {
+
+            if (lat != null || lon != null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Provide either city or coordinates, not both"
+                );
+            }
+
+            validateCity(city);
+
+        } else if (lat != null && lon != null) {
+
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Invalid latitude or longitude"
+                );
+            }
+
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Provide a city name or both latitude and longitude"
+            );
+        }
 
         String role = authentication.getAuthorities()
                 .iterator()
@@ -41,9 +70,14 @@ public class WeatherController {
                 "/api/weather/current"
         );
 
-        return weatherService.getCurrentWeather(city);
+        if (city != null && !city.isBlank()) {
+            return weatherService.getCurrentWeather(city);
+        }
+
+        return weatherService.getCurrentWeather(lat, lon);
     }
-    @GetMapping("/coordinates")
+    @PreAuthorize("hasAnyRole('USER', 'PREMIUM')")
+    @GetMapping("/search")
     public GeocodingResponse searchCity(
             @RequestParam String city,
             Authentication authentication) {

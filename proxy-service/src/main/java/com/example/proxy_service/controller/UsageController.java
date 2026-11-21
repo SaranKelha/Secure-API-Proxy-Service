@@ -3,6 +3,8 @@ package com.example.proxy_service.controller;
 import com.example.proxy_service.entity.Usage;
 import com.example.proxy_service.service.UsageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,11 @@ public class UsageController {
     public List<Usage> getMyUsage(Authentication authentication) {
 
         return usageService.getUserUsage(authentication.getName());
+    }
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Long> getTotalUsage() {
+        return ResponseEntity.ok(usageService.getTotalUsage());
     }
 
 }

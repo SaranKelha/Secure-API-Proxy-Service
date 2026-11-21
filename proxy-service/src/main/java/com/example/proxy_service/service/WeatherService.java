@@ -10,7 +10,7 @@ import com.example.proxy_service.dto.weatherResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -42,17 +42,13 @@ public class WeatherService {
         return new RestTemplate(factory);
     }
 
-    public weatherResponse getCurrentWeather(String city) {
-
-        // Step 1: Get city coordinates
-        GeocodingResponse location = getCoordinates(city);
+    public weatherResponse getCurrentWeather(double lat, double lon) {
 
         String url = "https://api.openweathermap.org/data/2.5/weather";
 
-        // Step 2: Call weather API using coordinates
         URI uri = UriComponentsBuilder.fromUriString(url)
-                .queryParam("lat", location.getLatitude())
-                .queryParam("lon", location.getLongitude())
+                .queryParam("lat", lat)
+                .queryParam("lon", lon)
                 .queryParam("appid", apiKey)
                 .queryParam("units", "metric")
                 .build()
@@ -65,11 +61,19 @@ public class WeatherService {
             response = restTemplate.getForObject(
                     uri, JsonNode.class
             );
-        } catch (HttpClientErrorException exception) {
+        } catch (RestClientResponseException exception) {
             throw handleWeatherApiError(exception);
         }
+
         catch (ResourceAccessException exception) {
             throw handleTimeout(exception);
+        }
+        // Check whether the API returned an empty response
+        if (response == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Weather service returned an empty response"
+            );
         }
 
         // Step 3: Convert API response into our DTO
@@ -81,6 +85,15 @@ public class WeatherService {
                 response.path("weather").path(0)
                         .path("description").asText(),
                 response.path("wind").path("speed").asDouble()
+        );
+    }
+    public weatherResponse getCurrentWeather(String city) {
+
+        GeocodingResponse location = getCoordinates(city);
+
+        return getCurrentWeather(
+                location.getLatitude(),
+                location.getLongitude()
         );
     }
 
@@ -100,7 +113,7 @@ public class WeatherService {
 
         try {
             response = restTemplate.getForObject(uri, JsonNode.class);
-        } catch (HttpClientErrorException exception) {
+        } catch (RestClientResponseException exception) {
             throw handleWeatherApiError(exception);
         }
         catch (ResourceAccessException exception) {
@@ -145,16 +158,28 @@ public class WeatherService {
             response = restTemplate.getForObject(
                     uri, JsonNode.class
             );
-        } catch (HttpClientErrorException exception) {
+        } catch (RestClientResponseException exception) {
             throw handleWeatherApiError(exception);
         }
         catch (ResourceAccessException exception) {
             throw handleTimeout(exception);
         }
+        if (response == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Weather service returned an empty response"
+            );
+        }
 
         List<ForecastItemResponse> forecasts = new ArrayList<>();
 
         JsonNode forecastList = response.path("list");
+        if (!forecastList.isArray() || forecastList.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Weather service returned no forecast data"
+            );
+        }
 
         for (JsonNode item : forecastList) {
 
@@ -171,8 +196,10 @@ public class WeatherService {
                 forecasts
         );
     }
+    // Convert OpenWeatherMap errors into appropriate Proxy Service responses.
+
     private ResponseStatusException handleWeatherApiError(
-            HttpClientErrorException exception) {
+            RestClientResponseException exception) {
 
         if (exception.getStatusCode().value() == 401) {
             return new ResponseStatusException(
@@ -183,8 +210,15 @@ public class WeatherService {
 
         if (exception.getStatusCode().value() == 429) {
             return new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE,
+                    HttpStatus.TOO_MANY_REQUESTS,
                     "Weather API rate limit exceeded"
+            );
+        }
+
+        if (exception.getStatusCode().value() == 404) {
+            return new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Weather data not found"
             );
         }
 
@@ -193,6 +227,7 @@ public class WeatherService {
                 "Weather service error"
         );
     }
+
 
     private ResponseStatusException handleTimeout(
             ResourceAccessException exception) {

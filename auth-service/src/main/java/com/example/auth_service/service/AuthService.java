@@ -71,5 +71,22 @@ public class AuthService {
 
         return jwtService.generateToken(user);
     }
+    public String updateUserRole(Long userId, Role newRole) {
+
+        // Find user by ID
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "User not found"
+                ));
+
+        // Update user's role
+        user.setRole(newRole);
+
+        // Save updated user
+        userRepository.save(user);
+
+        return "User role updated successfully";
+    }
 
 }
