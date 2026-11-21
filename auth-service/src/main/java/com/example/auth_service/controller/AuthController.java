@@ -3,9 +3,10 @@ package com.example.auth_service.controller;
 import com.example.auth_service.dto.LoginRequest;
 import com.example.auth_service.dto.RegisterRequest;
 import com.example.auth_service.service.AuthService;
-import com.example.auth_service.service.JwtService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class AuthController {
 
         String response = authService.register(request);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")

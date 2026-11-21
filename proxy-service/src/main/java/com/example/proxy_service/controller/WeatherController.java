@@ -43,7 +43,7 @@ public class WeatherController {
 
         return weatherService.getCurrentWeather(city);
     }
-    @GetMapping("/search")
+    @GetMapping("/coordinates")
     public GeocodingResponse searchCity(
             @RequestParam String city,
             Authentication authentication) {

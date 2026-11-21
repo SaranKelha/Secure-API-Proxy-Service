@@ -6,8 +6,10 @@ import com.example.auth_service.entity.Role;
 import com.example.auth_service.entity.User;
 import com.example.auth_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,10 @@ public class AuthService {
 
         // Check whether email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists"
+            );
         }
 
         // Create a new user
@@ -46,7 +51,10 @@ public class AuthService {
 
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Invalid email or password"
+                ));
 
         // Verify password
         boolean passwordMatches = passwordEncoder.matches(
@@ -55,7 +63,10 @@ public class AuthService {
         );
 
         if (!passwordMatches) {
-            throw new RuntimeException("Invalid password");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid email or password"
+            );
         }
 
         return jwtService.generateToken(user);
