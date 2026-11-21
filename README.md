@@ -13,21 +13,6 @@ The application contains two microservices:
 1. **Auth Service** – Handles user registration, login, password encryption, JWT generation, and role management.
 2. **Proxy Service** – Validates JWT tokens independently, enforces role-based access, communicates with the OpenWeatherMap API, and tracks API usage.
 
-#### Architecture Diagram
-
-```mermaid
-flowchart TD
-    A[Client / User]
-    A -->|Register / Login| B[Auth Service - Port 8081]
-    B --> C[(User Database)]
-    B -->|Returns JWT| A
-    A -->|Weather Request + JWT| D[Proxy Service - Port 8082]
-    D --> E[(Usage Database)]
-    D -->|Weather Request| F[OpenWeatherMap API]
-    F -->|Weather Response| D
-    D -->|Response| A
-```
-
 ## Technologies Used
 
 - Java
