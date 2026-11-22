@@ -1,3 +1,4 @@
+
 # Secure API Proxy Service
 
 A secure, role-based API proxy application built using Java and Spring Boot. The project consists of two independent microservices: an Authentication Service and a Proxy Service.
@@ -57,13 +58,38 @@ Base URL: `http://localhost:8082`
 | GET | `/api/weather/search?city=London` | Search city using geocoding | USER, PREMIUM |
 | GET | `/api/weather/forecast?city=London` | Get extended weather forecast | PREMIUM |
 | GET | `/api/usage/me` | Get personal API usage history | Authenticated users |
-| GET | `/api/usage/admin` | Get total API usage statistics | ADMIN |
+| GET | `/api/usage/admin` | Get overall API usage statistics | ADMIN |
 
 All protected endpoints require a valid JWT token in the Authorization header.
 
 Example:
 
 `Authorization: Bearer <your-jwt-token>`
+
+## Usage Tracking
+
+The Proxy Service tracks API requests made by authenticated users and stores usage records in PostgreSQL.
+
+### Personal Usage
+
+- `GET /api/usage/me` returns the authenticated user's API usage history.
+- Users can only view their own usage records.
+- Users cannot access another user's usage records through this endpoint.
+
+### ADMIN Usage Statistics
+
+The ADMIN endpoint provides overall API usage information.
+
+`GET /api/usage/admin`
+
+The response includes:
+
+- Total number of API requests.
+- Request counts grouped by user.
+- Request counts grouped by endpoint.
+- Latest 10 API requests, including user email, endpoint, and request time.
+
+Only users with the ADMIN role can access this endpoint.
 
 ## Rate Limiting
 
@@ -107,6 +133,10 @@ The following functionalities were checked:
 - City search using the Geocoding API.
 - Premium weather forecast access.
 - Unauthorized access restrictions for different roles.
+- Personal API usage history.
+- ADMIN usage statistics.
+- ADMIN endpoint authorization (200 for ADMIN, 403 for PREMIUM, and 401 without a token).
+- Verification of usage count updates after API requests.
 
 ## Project Structure
 
@@ -203,6 +233,7 @@ Proxy Service runs on port `8082`.
 - Role-based request rate limiting
 - Automatic cleanup of expired rate-limit counters
 - User-specific usage tracking
+- ADMIN-only overall usage statistics
 - SQL query logging disabled
 
 ## Limitations
