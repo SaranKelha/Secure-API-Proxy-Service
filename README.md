@@ -1,4 +1,3 @@
-
 # Secure API Proxy Service
 
 A secure, role-based API proxy application built using Java and Spring Boot. The project consists of two independent microservices: an Authentication Service and a Proxy Service.
@@ -33,7 +32,7 @@ The application contains two microservices:
 |---|---|
 | USER | Current weather, city search, and personal usage history |
 | PREMIUM | All USER permissions and extended weather forecast |
-| ADMIN | User role management and overall usage statistics |
+| ADMIN | All weather endpoints, personal usage history, user role management, and overall usage statistics |
 
 ## API Endpoints
 
@@ -53,10 +52,10 @@ Base URL: `http://localhost:8082`
 
 | Method | Endpoint | Description | Access |
 |---|---|---|---|
-| GET | `/api/weather/current?city=London` | Get current weather by city | USER, PREMIUM |
-| GET | `/api/weather/current?lat=51.5074&lon=-0.1278` | Get current weather by coordinates | USER, PREMIUM |
-| GET | `/api/weather/search?city=London` | Search city using geocoding | USER, PREMIUM |
-| GET | `/api/weather/forecast?city=London` | Get extended weather forecast | PREMIUM |
+| GET | `/api/weather/current?city=London` | Get current weather by city | USER, PREMIUM, ADMIN |
+| GET | `/api/weather/current?lat=51.5074&lon=-0.1278` | Get current weather by coordinates | USER, PREMIUM, ADMIN |
+| GET | `/api/weather/search?city=London` | Search city using geocoding | USER, PREMIUM, ADMIN |
+| GET | `/api/weather/forecast?city=London` | Get extended weather forecast | PREMIUM, ADMIN |
 | GET | `/api/usage/me` | Get personal API usage history | Authenticated users |
 | GET | `/api/usage/admin` | Get overall API usage statistics | ADMIN |
 
@@ -137,6 +136,7 @@ The following functionalities were checked:
 - ADMIN usage statistics.
 - ADMIN endpoint authorization (200 for ADMIN, 403 for PREMIUM, and 401 without a token).
 - Verification of usage count updates after API requests.
+- Role-based rate limiting for USER, PREMIUM, and ADMIN.
 
 ## Project Structure
 
@@ -169,6 +169,13 @@ Configure the following environment variables before running the application.
 | `OPENWEATHER_API_KEY` | OpenWeatherMap API key |
 | `ADMIN_EMAIL` | Initial administrator email |
 | `ADMIN_PASSWORD` | Initial administrator password |
+
+### Database Configuration
+
+Create the following PostgreSQL databases before starting the services:
+
+- `auth_db` – Used by the Auth Service.
+- `proxy_db` – Used by the Proxy Service.
 
 The Auth Service uses `AdminInitializer` to create an initial ADMIN account if one does not already exist.
 
