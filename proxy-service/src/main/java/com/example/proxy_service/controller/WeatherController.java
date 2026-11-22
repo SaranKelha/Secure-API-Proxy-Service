@@ -23,7 +23,7 @@ public class WeatherController {
     private final WeatherService weatherService;
     private final UsageService usageService;
     private final RateLimitService rateLimitService;
-    @PreAuthorize("hasAnyRole('USER', 'PREMIUM')")
+    @PreAuthorize("hasAnyRole('USER', 'PREMIUM', 'ADMIN')")
     @GetMapping("/current")
     public weatherResponse getCurrentWeather(
             @RequestParam(required = false) String city,
@@ -76,7 +76,7 @@ public class WeatherController {
 
         return weatherService.getCurrentWeather(lat, lon);
     }
-    @PreAuthorize("hasAnyRole('USER', 'PREMIUM')")
+    @PreAuthorize("hasAnyRole('USER', 'PREMIUM','ADMIN')")
     @GetMapping("/search")
     public GeocodingResponse searchCity(
             @RequestParam String city,
@@ -98,7 +98,7 @@ public class WeatherController {
         return weatherService.getCoordinates(city);
     }
     @GetMapping("/forecast")
-    @PreAuthorize("hasRole('PREMIUM')")
+    @PreAuthorize("hasRole('PREMIUM', 'ADMIN')")
     public ForecastResponse getForecast(
             @RequestParam String city,
             Authentication authentication) {

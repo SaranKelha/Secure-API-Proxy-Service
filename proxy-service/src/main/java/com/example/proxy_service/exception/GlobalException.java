@@ -6,6 +6,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
@@ -41,5 +42,13 @@ public class GlobalException {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body("Required parameter is missing: " + exception.getParameterName());
+    }
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Invalid value for parameter: " + exception.getName());
     }
 }
