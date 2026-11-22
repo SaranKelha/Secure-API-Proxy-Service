@@ -67,7 +67,7 @@ Example:
 
 ## Rate Limiting
 
-The application implements role-based rate limiting.
+The application implements role-based rate limiting for weather endpoints.
 
 | Role | Requests per minute |
 |---|---:|
@@ -75,7 +75,9 @@ The application implements role-based rate limiting.
 | PREMIUM | 30 |
 | ADMIN | 60 |
 
-Rate limits are maintained using an in-memory data structure. The counters reset when the application restarts and are not shared across multiple service instances.
+Rate limits are maintained using an in-memory data structure. Expired user counters are periodically removed from memory to prevent unnecessary memory usage.
+
+The counters reset when the application restarts and are not shared across multiple service instances.
 
 ## Error Handling
 
@@ -193,12 +195,15 @@ Proxy Service runs on port `8082`.
 
 - JWT-based authentication
 - BCrypt password hashing
+- Minimum password length of 8 characters
 - Role-based access control
 - Independent JWT validation in Proxy Service
-- Stateless authentication
+- Stateless authentication using `SessionCreationPolicy.STATELESS`
 - Protected external API key
-- Request rate limiting
+- Role-based request rate limiting
+- Automatic cleanup of expired rate-limit counters
 - User-specific usage tracking
+- SQL query logging disabled
 
 ## Limitations
 
