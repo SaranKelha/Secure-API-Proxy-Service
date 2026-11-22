@@ -24,7 +24,6 @@ The application contains two microservices:
 - BCrypt Password Encryption
 - PostgreSQL
 - Maven
-- JUnit and Mockito
 - OpenWeatherMap API
 
 ## User Roles and Permissions
@@ -92,6 +91,21 @@ The Proxy Service handles errors from the external weather API.
 
 The application also validates request parameters and handles empty or invalid API responses.
 
+## Manual Testing
+
+The application endpoints were tested manually using Postman.
+
+The following functionalities were checked:
+
+- User registration and login.
+- JWT token authentication.
+- Role-based access restrictions.
+- Current weather using city names.
+- Current weather using geographic coordinates.
+- City search using the Geocoding API.
+- Premium weather forecast access.
+- Unauthorized access restrictions for different roles.
+
 ## Project Structure
 
 ```text
@@ -99,17 +113,15 @@ Secure-API-Proxy-Service/
 │
 ├── auth-service/
 │   └── src/
-│       ├── main/
-│       │   ├── java/
-│       │   └── resources/
-│       └── test/
+│       └── main/
+│           ├── java/
+│           └── resources/
 │
 ├── proxy-service/
 │   └── src/
-│       ├── main/
-│       │   ├── java/
-│       │   └── resources/
-│       └── test/
+│       └── main/
+│           ├── java/
+│           └── resources/
 │
 └── .gitignore
 ```
@@ -177,27 +189,6 @@ mvn spring-boot:run
 
 Proxy Service runs on port `8082`.
 
-## Testing
-
-The project includes automated unit tests using JUnit and Mockito.
-
-Tests cover:
-
-- User registration and login
-- Duplicate email validation
-- Password verification
-- Role-based authorization
-- Rate limiting
-- Usage tracking
-- Weather API responses
-- Upstream API errors and timeouts
-
-Run the tests from each service directory:
-
-```bash
-mvn test
-```
-
 ## Security Features
 
 - JWT-based authentication
@@ -227,4 +218,4 @@ mvn test
 
 ## Author
 
-Developed as part of a Software Engineer Internship  Assignment.
+Developed as part of a Software Engineer Internship Assignment.
