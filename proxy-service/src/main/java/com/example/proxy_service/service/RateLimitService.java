@@ -11,6 +11,7 @@ import java.util.Map;
 public class RateLimitService {
     private final Map<String, RequestCounter> requestCounts =
             new HashMap<>();
+    private long lastCleanupTime = 0;
 
     private static class RequestCounter {
         private int count;
@@ -38,6 +39,12 @@ public class RateLimitService {
         }
 
         long currentTime = System.currentTimeMillis();
+        if (currentTime - lastCleanupTime >= 60000) {
+            requestCounts.entrySet().removeIf(
+                    entry -> currentTime - entry.getValue().windowStart >= 60000
+            );
+            lastCleanupTime = currentTime;
+        }
 
         RequestCounter counter = requestCounts.get(email);
 
