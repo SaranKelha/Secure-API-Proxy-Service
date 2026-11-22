@@ -98,7 +98,7 @@ public class WeatherController {
         return weatherService.getCoordinates(city);
     }
     @GetMapping("/forecast")
-    @PreAuthorize("hasRole('PREMIUM', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('PREMIUM', 'ADMIN')")
     public ForecastResponse getForecast(
             @RequestParam String city,
             Authentication authentication) {
